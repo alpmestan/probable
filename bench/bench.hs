@@ -1,31 +1,33 @@
+{-# LANGUAGE FlexibleContexts #-}
 module Main where
 
 import Control.Applicative
 import Control.Monad
 import Criterion.Main
 
-import qualified Data.Vector.Unboxed as V
+import qualified Data.Vector         as V
+import qualified Data.Vector.Unboxed as U
 import Math.Probable
+import Math.Probable.Random
 
-randomInts :: Int -> IO (V.Vector Int)
-randomInts n = runProb (vectorOf n variate)
+randomInts :: Int -> IO (U.Vector Int)
+randomInts n = mwc (vectorOf n sample)
 
 data Person = Person 
     { age    :: Int
     , weight :: Double
-    , name   :: String
     , salary :: Int
     } deriving (Eq, Show)
 
-person :: Prob IO Person
+person :: (Generator g m Double, Generator g m Int, Monad m) 
+       => RandT g m Person
 person = 
-    Person <$> variateIn (1, 100)
-           <*> variateIn (2, 130)
-           <*> replicateM 15 alpha
-           <*> variateIn (500, 10000)
+    Person <$> sampleUniform (1, 100)
+           <*> sampleUniform (2, 130)
+           <*> sampleUniform (500, 10000)
 
-randomPersons :: Int -> IO [Person]
-randomPersons n = runProb $ replicateM n person
+randomPersons :: Int -> IO (V.Vector Person)
+randomPersons n = mwc $ vectorOf n person
 
 main :: IO ()
 main = do 
