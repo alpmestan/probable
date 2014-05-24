@@ -6,9 +6,6 @@ module Math.Probable.Types
       
       -- * accessing the random generator
       withGen,
-      PrimMonad,
-      PrimState,
-      Gen,
     ) 
     where
 

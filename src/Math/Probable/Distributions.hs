@@ -1,5 +1,6 @@
 module Math.Probable.Distributions where
 
+import Control.Monad.Primitive
 import Math.Probable.Types
 import Statistics.Distribution
 import Statistics.Types

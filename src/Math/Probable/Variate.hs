@@ -3,6 +3,7 @@
 module Math.Probable.Variate where
 
 import Control.Monad (replicateM)
+import Control.Monad.Primitive
 import Data.Char (chr)
 import Math.Probable.Types
 

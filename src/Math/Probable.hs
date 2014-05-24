@@ -1,4 +1,13 @@
-{-# LANGUAGE RankNTypes #-}
+-- |
+-- Module       : Math.Probable
+-- Copyright    : (c) 2014 Alp Mestanogullari
+-- License      : BSD3
+-- Maintainer   : alpmestan@gmail.com
+-- Stability    : experimental
+-- Portability  : GHC
+-- 
+-- Easy, composable and efficient random number generation.
+
 module Math.Probable
     ( 
       -- * 'Prob' type
@@ -27,7 +36,8 @@ import Math.Probable.Variate
 
 import Control.Applicative
 import Control.Monad (replicateM)
-import System.Random.MWC (withSystemRandom)
+import Control.Monad.Primitive
+import System.Random.MWC
 
 import qualified Data.Vector.Generic as G
 
@@ -52,11 +62,11 @@ listOf n pr = replicateM n pr
 
 -- | Use the given generator to generate
 --   a 'G.Vector' of 'n' values
-vectorOf :: (PrimMonad m, G.Vector v a)
+vectorOf :: (Functor m, PrimMonad m, G.Vector v a)
          => Int
          -> Prob m a
          -> Prob m (v a)
-vectorOf n pr = G.replicateM n pr
+vectorOf n pr = G.fromList `fmap` listOf n pr
 {-# INLINE vectorOf #-}
 
 -- | Use the given generator to generate
