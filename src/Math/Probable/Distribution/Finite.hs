@@ -1,7 +1,9 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving, 
              BangPatterns, 
              TupleSections, 
-             TypeSynonymInstances, 
+             TypeSynonymInstances,
+             UndecidableInstances,
+             FlexibleContexts, 
              FlexibleInstances #-}
 
 module Math.Probable.Distribution.Finite where
@@ -10,6 +12,7 @@ import Control.Applicative
 import Control.Monad
 import Control.Monad.Trans
 import Data.List
+import Math.Probable.Random
 
 newtype P = P Double
     deriving (Eq, Ord, Fractional, Num, Real, RealFrac)
@@ -75,22 +78,37 @@ instance Monad m => Monad (EventT m) where
 instance MonadTrans EventT where
     lift x = EventT (liftM return x)
 
--- | A finite distribution, i.e a distribution of probabilities 
+-- | a distribution of probabilities 
 --   over a finite set.
-class (Functor d, Monad d) => Finite d where
+class (Functor d, Monad d) => FromFinite d where
     weighted :: [(a, Double)] -> d a
 
-uniform :: Finite d => [a] -> d a
+uniform :: FromFinite d => [a] -> d a
 uniform = weighted . map (,1)
+{-# INLINE uniform #-}
 
 type Fin = EventT []
 
 exact :: Fin a -> [Event a]
 exact = runEventT
 
-instance Finite Fin where
+instance FromFinite Fin where
     weighted l = EventT $ map weight l
 
         where weight (x, w) = Event x $ P (w / total)
               total         = foldl' (\w (_, w') -> w + w') 0 l
+
+instance Generator g m Double => FromFinite (RandT g m) where
+    weighted = liftF . weighted
+
+liftF :: Generator g m Double => Fin a -> RandT g m a
+liftF dist = do
+    d <- double
+    pick (P d) (exact dist)
+
+pick :: Monad m => P -> [Event a] -> m a
+pick _ [] = error "Dist (RandT g m).pick: no values to pick from"
+pick n (Event x p : evts)
+    | n <= p    = return x
+    | otherwise = pick (n-p) evts
 
