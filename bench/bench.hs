@@ -1,57 +1,32 @@
+{-# LANGUAGE FlexibleContexts #-}
 module Main where
 
 import Control.Applicative
 import Control.Monad
 import Criterion.Main
+
+import qualified Data.Vector         as V
+import qualified Data.Vector.Unboxed as U
 import Math.Probable
 
-import qualified Control.Monad.Random as MR
-import qualified Data.Vector.Unboxed as VU
-import qualified Data.Vector         as V
+randomInts :: Int -> IO (U.Vector Int)
+randomInts n = mwc (vectorOf n sample)
 
 -- | Dummy 'Person' type
 data Person = Person 
     { age    :: Int
     , weight :: Double
-    , name   :: String
     , salary :: Int
     } deriving (Eq, Show)
 
--- | Generating a 'V.Vector' of 'Int' with probable
-probInts :: Int -> IO (VU.Vector Int)
-probInts n = runProb (vectorOf n variate)
-
--- | Generating a 'Person' with probable
-person :: Prob IO Person
+person :: (Generator g m Double, Generator g m Int) 
+       => RandT g m Person
 person = 
-    Person <$> variateIn (1, 100)
-           <*> variateIn (2, 130)
-           <*> replicateM 8 alpha
-           <*> variateIn (500, 10000)
+    Person <$> sampleUniform (1, 100)
+           <*> sampleUniform (2, 130)
+           <*> sampleUniform (500, 10000)
 
--- | Generating a 'V.Vector' of 'Person's with probable
-probPersons :: Int -> IO (V.Vector Person)
-probPersons n = runProb (vectorOf n person)
-
--- | Generating a 'V.Vector' of 'Int's with MonadRandom
-randInts :: Int -> IO (VU.Vector Int)
-randInts n = 
-    MR.evalRandIO $ VU.fromList `fmap` replicateM n MR.getRandom
-
--- | Generating a 'Person' with MonadRandom
-randPerson :: MR.RandomGen g => MR.Rand g Person
-randPerson = 
-    Person <$> MR.getRandomR (1, 100)
-           <*> MR.getRandomR (2, 130)
-           <*> replicateM 8 randChar
-           <*> MR.getRandomR (500, 10000)
-
-    where randChar = MR.getRandom
-
--- | Generating a 'V.Vector' of 'Person's with MonadRandom
-randPersons :: Int -> IO (V.Vector Person)
-randPersons n = 
-    MR.evalRandIO $ V.fromList `fmap` replicateM n randPerson
+randomPersons :: Int -> IO (V.Vector Person)
 
 -- | Time to benchmark!
 main :: IO ()
