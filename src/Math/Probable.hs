@@ -14,10 +14,10 @@ module Math.Probable
        ( -- * random value generation
          module Math.Probable.Random
 
-       , -- * finite distributions
-         module Math.Probable.Distribution.Finite 
+       , -- * distributions
+         module Math.Probable.Distribution
        ) where
 
-import Math.Probable.Distribution.Finite
+import Math.Probable.Distribution
 import Math.Probable.Random
 

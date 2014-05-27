@@ -1,9 +1,5 @@
-{-# LANGUAGE BangPatterns, 
-             TypeSynonymInstances, 
-             FlexibleInstances,
-             FlexibleContexts,
-             TypeFamilies,
-             FunctionalDependencies #-}
+{-# LANGUAGE BangPatterns,
+             TypeFamilies #-}
 module Math.Probable.Random where
 
 import Control.Applicative
@@ -12,168 +8,117 @@ import Control.Monad.Primitive
 import Data.Int
 import Data.Word
 import qualified Data.Vector.Generic as G
-import qualified System.Random     as SR
 import qualified System.Random.MWC as MWC
 
 
 -- TODO? make 'm' be: * 'g -> (a, g)' (~ 'State g') when using StdGen
 --                    * 'g -> IO a' ( 'ReaderT g IO') when using MWC
 -- to avoid passing around MWC's gen
-newtype RandT g m a =
-    RandT { runRandT :: g -> m (a, g) }
+newtype RandT m a =
+    RandT { runRandT :: MWC.Gen (PrimState m) -> m a }
 
-instance Monad m => Monad (RandT g m) where
-    return !x = RandT $ \gen -> return (x, gen)
+instance Monad m => Monad (RandT m) where
+    return x = RandT $ \_ -> return x
+    {-# INLINE return #-}
 
-    m >>= f = RandT $ \gen -> 
-                do (!v, gen') <- runRandT m gen
-                   runRandT (f v) gen'
+    (RandT g) >>= f = 
+        RandT $ \gen -> do
+            !v <- g gen
+            !res <- runRandT (f v) gen
+            return res
+    {-# INLINE (>>=) #-}
 
-instance Monad m => Functor (RandT g m) where
-    fmap = liftM
+instance Monad m => Functor (RandT m) where
+    fmap f r = RandT $ \gen -> return . f =<< runRandT r gen
+    {-# INLINE fmap #-}
 
-instance Monad m => Applicative (RandT g m) where
+instance Monad m => Applicative (RandT m) where
     pure = return
+    {-# INLINE pure #-}
 
-    mf <*> mx = RandT $ \gen ->
-                  do (f, gen')   <- runRandT mf gen
-                     runRandT (fmap f mx) gen'
+    (<*>) = ap
+    {-# INLINE (<*>) #-}
 
-class Monad m => Generator g m a | g -> m where
-    sample :: RandT g m a
+int :: PrimMonad m => RandT m Int
+int = RandT MWC.uniform
+{-# INLINE int #-}
 
-    sampleUniform :: (a, a) -> RandT g m a
+int8 :: PrimMonad m => RandT m Int8
+int8 = RandT MWC.uniform
+{-# INLINE int8 #-}
 
-int :: Generator g m Int 
-    => RandT g m Int
-int = sample
+int16 :: PrimMonad m => RandT m Int16
+int16 = RandT MWC.uniform
+{-# INLINE int16 #-}
 
-int8 :: Generator g m Int8
-     => RandT g m Int8
-int8 = sample
+int32 :: PrimMonad m => RandT m Int32
+int32 = RandT MWC.uniform
+{-# INLINE int32 #-}
 
-int16 :: Generator g m Int16
-      => RandT g m Int16
-int16 = sample
+int64 :: PrimMonad m => RandT m Int64
+int64 = RandT MWC.uniform
+{-# INLINE int64 #-}
 
-int32 :: Generator g m Int32
-      => RandT g m Int32
-int32 = sample
+word :: PrimMonad m => RandT m Word
+word = RandT MWC.uniform
+{-# INLINE word #-}
 
-int64 :: Generator g m Int64
-      => RandT g m Int64
-int64 = sample
+word8 :: PrimMonad m => RandT m Word8
+word8 = RandT MWC.uniform
+{-# INLINE word8 #-}
 
-word :: Generator g m Word
-     => RandT g m Word
-word = sample
+word16 :: PrimMonad m => RandT m Word16
+word16 = RandT MWC.uniform
+{-# INLINE word16 #-}
 
-word8 :: Generator g m Word8
-      => RandT g m Word8
-word8 = sample
+word32 :: PrimMonad m => RandT m Word32
+word32 = RandT MWC.uniform
+{-# INLINE word32 #-}
 
-word16 :: Generator g m Word16
-       => RandT g m Word16
-word16 = sample
+word64 :: PrimMonad m => RandT m Word64
+word64 = RandT MWC.uniform
+{-# INLINE word64 #-}
 
-word32 :: Generator g m Word32
-       => RandT g m Word32
-word32 = sample
+float :: PrimMonad m => RandT m Float
+float = RandT MWC.uniform
+{-# INLINE float #-}
 
-word64 :: Generator g m Word64
-       => RandT g m Word64
-word64 = sample
+double :: PrimMonad m => RandT m Double
+double = RandT MWC.uniform
+{-# INLINE double #-}
 
-float :: Generator g m Float
-      => RandT g m Float
-float = sample
+bool :: PrimMonad m => RandT m Bool
+bool = RandT MWC.uniform
+{-# INLINE bool #-}
 
-double :: Generator g m Double
-       => RandT g m Double
-double = sample
+uniformIn :: (MWC.Variate a, PrimMonad m) => (a, a) -> RandT m a
+uniformIn (a, b) = RandT $ MWC.uniformR (a, b)
 
-integer :: Generator g m Integer
-        => RandT g m Integer
-integer = sample
-
-char :: Generator g m Char
-     => RandT g m Char
-char = sample
-
-bool :: Generator g m Bool
-     => RandT g m Bool
-bool = sample
-
-instance (MWC.Variate a, PrimState IO ~ s) => Generator (MWC.Gen s) IO a where
-    sample = RandT $ \gen -> do !v <- MWC.uniform gen
-                                return (v, gen)
-
-    sampleUniform (low, hi) =
-        RandT $ \gen -> do !v <- MWC.uniformR (low, hi) gen
-                           return (v, gen)
-
-instance SR.Random a => Generator SR.StdGen Identity a where
-    sample = RandT $ \gen -> do (!v, !gen') <- return $ SR.random gen
-                                return (v, gen')
-
-    sampleUniform (low, hi) =
-        RandT $ \gen -> do (!v, !gen') <- return $ SR.randomR (low, hi) gen
-                           return (v, gen')
-
-stdWith :: SR.StdGen 
-        -> RandT SR.StdGen Identity a
-        -> a
-stdWith gen r = fst . runIdentity $ runRandT r gen
-
-stdSeed :: Int 
-        -> RandT SR.StdGen Identity a
-        -> a
-stdSeed seed r = fst . runIdentity $ runRandT r (SR.mkStdGen seed)
-
-stdIO :: RandT SR.StdGen Identity a 
-      -> IO a
-stdIO r = do
-    gen <- SR.getStdGen
-    return $! fst (runIdentity (runRandT r gen))
-
-mwc :: PrimState IO ~ s
-    => RandT (MWC.Gen s) IO a
+mwc :: RandT IO a
     -> IO a
-mwc r = MWC.withSystemRandom 
-      . MWC.asGenIO $ \gen -> do
-         (v, _) <- runRandT r gen
-         return v
+mwc = MWC.withSystemRandom 
+    . MWC.asGenIO 
+    . runRandT
+{-# INLINE mwc #-}
 
 listOf :: Monad m 
        => Int
-       -> RandT g m a
-       -> RandT g m [a] 
+       -> RandT m a
+       -> RandT m [a] 
 listOf n r = replicateM n r
+{-# INLINE listOf #-}
 
-vectorOf :: ( Monad m 
-            , G.Vector v a )
+vectorOfVariate :: (PrimMonad m, MWC.Variate a, G.Vector v a)
+                => Int
+                -> RandT m (v a)
+vectorOfVariate n = 
+    RandT $ \gen -> MWC.uniformVector gen n
+{-# INLINE vectorOfVariate #-}
+
+vectorOf :: (Monad m, G.Vector v a)
          => Int
-         -> RandT g m a
-         -> RandT g m (v a)
-vectorOf n r = G.fromList `fmap` listOf n r
--- or maybe 'V.replicateM n r' is faster?
-
-purely :: RandT g Identity a
-       -> g
-       -> a
-purely r gen = fst . runIdentity $ runRandT r gen
-
-purelyWith :: RandT g Identity a
-           -> (s -> g)
-           -> s
-           -> a
-purelyWith r seedToGen seed =
-    fst . runIdentity $ runRandT r (seedToGen seed)
-
-impurely :: RandT g IO a
-         -> IO g
-         -> IO a
-impurely r getGen = do
-    gen <- getGen
-    (v, _) <- runRandT r gen
-    return $! v
+         -> RandT m a
+         -> RandT m (v a)
+vectorOf n r =
+    RandT $ \gen -> G.replicateM n (runRandT r gen)
+{-# INLINE vectorOf #-}
