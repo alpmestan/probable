@@ -133,6 +133,7 @@ double = RandT MWC.uniform
 
 doubleIn :: PrimMonad m => (Double, Double) -> RandT m Double
 doubleIn (a, b) = RandT $ MWC.uniformR (a, b)
+{-# INLINE doubleIn #-}
 
 bool :: PrimMonad m => RandT m Bool
 bool = RandT MWC.uniform
@@ -140,6 +141,7 @@ bool = RandT MWC.uniform
 
 uniformIn :: (MWC.Variate a, PrimMonad m) => (a, a) -> RandT m a
 uniformIn (a, b) = RandT $ MWC.uniformR (a, b)
+{-# INLINE uniformIn #-}
 
 mwc :: RandT IO a
     -> IO a
