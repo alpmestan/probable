@@ -8,7 +8,7 @@ code from Eric Kidd's posts, and all the usual distributions
 covered in the [statistics](http://hackage.haskell.org/package/statistics)
 package.
 
-You can see how it looks in [examples](https://github.com/alpmestan/probable/tree/master/examples), or below.
+You can see how it looks in [examples](https://github.com/alpmestan/probable/tree/master/examples), or below. You can view the documentation for 0.1 [here](http://alpmestan.com/probable/).
 
 ## Example
 
