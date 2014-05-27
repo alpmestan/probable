@@ -2,11 +2,13 @@ probable
 ========
 
 Simple random value generation for haskell, using an efficient
-random generator and minimizing system calls.
+random generator and minimizing system calls. But the library also
+lets you work with distributions over a finite set, adapting
+code from Eric Kidd's posts, and all the usual distributions
+covered in the [statistics](http://hackage.haskell.org/package/statistics)
+package.
 
 You can see how it looks in [examples](https://github.com/alpmestan/probable/tree/master/examples), or below.
-
-_Note_: This is still WIP.
 
 ## Example
 
@@ -29,9 +31,9 @@ data Person = Person
 
 person :: RandT IO Person
 person = 
-    Person <$> uniformIn (1, 100)
-           <*> uniformIn (2, 130)
-           <*> uniformIn (500, 10000)
+    Person <$> intIn (1, 100)
+           <*> doubleIn (2, 130)
+           <*> intIn (500, 10000)
 
 randomPersons :: Int -> IO [Person]
 randomPersons n = mwc $ listOf n person
@@ -45,7 +47,7 @@ main = do
 	randomDoubles 10 >>= VU.mapM_ print
 ```
 
-Distributions over finite sets and sampling from them.
+Distributions over finite sets, conditional probabilities and random sampling.
 
 ``` haskell
 module Main where
