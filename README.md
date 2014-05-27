@@ -45,7 +45,7 @@ main = do
 	randomDoubles 10 >>= VU.mapM_ print
 ```
 
-Distributions over finite sets, sampling from them and using Bayes' rule:
+Distributions over finite sets and sampling from them.
 
 ``` haskell
 module Main where
