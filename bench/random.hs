@@ -11,9 +11,13 @@ import qualified Data.Vector         as V
 import qualified Data.Vector.Unboxed as U
 import Math.Probable
 
-probable :: (U.Unbox a, Variate a) => Int -> IO (U.Vector a)
-probable n = mwc (vectorOf n)
-{-# INLINE probable #-}
+probable1 :: (U.Unbox a, Variate a) => Int -> IO (U.Vector a)
+probable1 n = mwc (vectorOfVariate n)
+{-# INLINE probable1 #-}
+
+probable2 :: U.Unbox a => RandT IO a -> Int -> IO (U.Vector a)
+probable2 r n = mwc (vectorOf n r)
+{-# INLINE probable2 #-}
 
 mwc1 :: (U.Unbox a, Variate a) => Int -> IO (U.Vector a)
 mwc1 n = 
@@ -24,7 +28,7 @@ mwc1 n =
 mwc2 :: (U.Unbox a, Variate a) => Int -> IO (U.Vector a)
 mwc2 n =
   withSystemRandom . asGenIO $
-      \gen -> U.replicateM n (uniform gen)
+      \gen -> U.replicateM n (System.Random.MWC.uniform gen)
 {-# INLINE mwc2 #-}
 
 mwcm :: (U.Unbox a, Variate a) => Int -> IO (U.Vector a)
@@ -61,14 +65,16 @@ main = do
     defaultMain 
         [ 
             bgroup "big vector of int"
-                [ bench "probable" $ whnfIO (i $ probable n)
+                [ bench "probable1" $ whnfIO (i $ probable1 n)
+                , bench "probable2" $ whnfIO (i $ probable2 int n)
                 , bench "mwc-random" $ whnfIO (i $ mwc1 n)
                 , bench "mwc-random2" $ whnfIO (i $ mwc2 n)
                 , bench "mwc-random-monad" $ whnfIO (i $ mwcm n)
                 ],
 
             bgroup "big vector of double"
-                [ bench "probable" $ whnfIO (d $ probable n)
+                [ bench "probable1" $ whnfIO (d $ probable1 n)
+                , bench "probable2" $ whnfIO (d $ probable2 double n)
                 , bench "mwc-random" $ whnfIO (d $ mwc1 n)
                 , bench "mwc-random2" $ whnfIO (d $ mwc2 n)
                 , bench "mwc-random-monad" $ whnfIO (d $ mwcm n)
