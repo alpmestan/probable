@@ -1,6 +1,8 @@
 probable
 ========
 
+[![Build Status](https://secure.travis-ci.org/alpmestan/probable.png?branch=master)](http://travis-ci.org/alpmestan/probable)
+
 Simple random value generation for haskell, using an efficient
 random generator and minimizing system calls. But the library also
 lets you work with distributions over a finite set, adapting

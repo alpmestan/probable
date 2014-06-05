@@ -38,16 +38,6 @@ resultOf strategy chosen opened cardoor =
         True  -> Win
         False -> Lose
 
--- | We run the distribution of results and group the 'Win's and the 'Lose's
---   respective probabilities together
---   maybe this should be in the library, with a more general type...
-collect :: Fin Result -> (Event Result, Event Result)
-collect = f . exact
-    where f = toPair . foldl' combine (0, 0)
-          combine (!winP, !loseP) (Event Win p)  = (winP+p, loseP)
-          combine (!winP, !loseP) (Event Lose p) = (winP,   loseP+p)
-          toPair (winP, loseP) = (Event Win winP, Event Lose loseP)
-
 -- | Given a strategy to adopt, what's the distribution of Win/Lose ?
 result :: (Door -> Door -> Door)
        -> Fin Result
@@ -97,11 +87,11 @@ result' strategy = do
 main :: IO ()
 main = do
     putStrLn $ "Using the conservative strategy: "
-            ++ show (collect $ result keep)
+            ++ show (exact $ result keep)
     -- Using the conservative strategy: (Event Win 33.3%,Event Lose 66.7%)
 
     putStrLn $ "Switching: "
-            ++ show (collect $ result switch)
+            ++ show (exact $ result switch)
     -- Switching: (Event Win 66.7%,Event Lose 33.3%)
 
     putStrLn "---"
