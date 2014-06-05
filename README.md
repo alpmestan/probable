@@ -89,3 +89,10 @@ main = do
 	print $ exact twoBooks
 	print $ exact oneInteresting
 ```
+
+Contact
+=======
+
+This library is written and maintained by Alp Mestanogullari.
+
+Feel free to contact me for any feedback, comment, suggestion, bug report and what not.
