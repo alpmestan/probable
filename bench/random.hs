@@ -61,19 +61,17 @@ main = do
     defaultMain 
         [ 
             bgroup "big vector of int"
-                [ bench "probable3" $ whnfIO (i $ probable3 n)
-                , bench "probable5" $ whnfIO (probable5 n int)
+                [ bench "probable" $ whnfIO (i $ probable n)
                 , bench "mwc-random" $ whnfIO (i $ mwc1 n)
                 , bench "mwc-random2" $ whnfIO (i $ mwc2 n)
-                , bench "mwc-random-monad2" $ whnfIO (i $ mwcm n)
+                , bench "mwc-random-monad" $ whnfIO (i $ mwcm n)
                 ],
 
             bgroup "big vector of double"
-                [ bench "probable3" $ whnfIO (d $ probable3 n)
-                , bench "probable5" $ whnfIO (probable5 n double)
+                [ bench "probable" $ whnfIO (d $ probable n)
                 , bench "mwc-random" $ whnfIO (d $ mwc1 n)
                 , bench "mwc-random2" $ whnfIO (d $ mwc2 n)
-                , bench "mwc-random-monad2" $ whnfIO (d $ mwcm n)
+                , bench "mwc-random-monad" $ whnfIO (d $ mwcm n)
                 ]
         ]
 
