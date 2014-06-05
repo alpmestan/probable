@@ -1,13 +1,13 @@
 language: haskell
 
 script:
-  - cabal install --only-dependencies && cabal configure && cabal build && cabal bench
+  - cabal install --only-dependencies && cabal configure --enable-benchmarks && cabal build && cabal bench
 
 before_install:
   - cabal update
 
 install:
-  - cabal install --only-dependencies
+  - cabal install --only-dependencies --enable-benchmarks
   
 notifications:
   email:
