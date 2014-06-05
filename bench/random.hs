@@ -11,13 +11,9 @@ import qualified Data.Vector         as V
 import qualified Data.Vector.Unboxed as U
 import Math.Probable
 
-probable3 :: (U.Unbox a, Variate a) => Int -> IO (U.Vector a)
-probable3 n = mwc (vectorOf3 n)
-{-# INLINE probable3 #-}
-
-probable5 :: U.Unbox a => Int -> RandT IO a -> IO (U.Vector a)
-probable5 n gen = mwc (vectorOf5 n gen)
-{-# INLINE probable5 #-}
+probable :: (U.Unbox a, Variate a) => Int -> IO (U.Vector a)
+probable n = mwc (vectorOf n)
+{-# INLINE probable #-}
 
 mwc1 :: (U.Unbox a, Variate a) => Int -> IO (U.Vector a)
 mwc1 n = 
