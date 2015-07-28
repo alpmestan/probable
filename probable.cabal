@@ -1,5 +1,5 @@
 name:                probable
-version:             0.1.0.0
+version:             0.1.1
 synopsis:            Easy and reasonably efficient probabilistic programming and random generation
 description:         Easy and reasonably efficient probabilistic programming and random generation
                      .
@@ -61,11 +61,11 @@ license:             BSD3
 license-file:        LICENSE
 author:              Alp Mestanogullari
 maintainer:          alpmestan@gmail.com
-copyright:           2014 Alp Mestanogullari
+copyright:           2014-2015 Alp Mestanogullari
 category:            Math, Statistics
 build-type:          Simple 
 cabal-version:       >=1.10
-tested-with:         GHC == 7.6.3, GHC == 7.8.2
+tested-with:         GHC == 7.6.3, GHC == 7.8.2, GHC == 7.10.1
 extra-source-files:  bench/*.hs,
                      examples/*.hs,
                      README.md

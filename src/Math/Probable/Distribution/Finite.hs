@@ -1,10 +1,11 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving, 
+             CPP,
              BangPatterns, 
              TupleSections,
              FlexibleInstances, 
              TypeSynonymInstances #-}
 -- |
--- Module       : Math.Probable
+-- Module       : Math.Probable.Distribution.Finite
 -- License      : BSD3
 -- Maintainer   : alpmestan@gmail.com
 -- Stability    : experimental
@@ -149,7 +150,10 @@ module Math.Probable.Distribution.Finite
     , FinBayes, bayes, condition, onlyJust
     ) where
 
+#if !MIN_VERSION_base(4, 8, 0)
 import Control.Applicative
+#endif
+
 import Control.Monad
 import Control.Monad.Primitive
 import Control.Monad.Trans

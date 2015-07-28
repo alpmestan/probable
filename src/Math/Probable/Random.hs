@@ -1,8 +1,8 @@
-{-# LANGUAGE BangPatterns,
+{-# LANGUAGE CPP, BangPatterns,
              TypeFamilies #-}
 
 -- |
--- Module       : Math.Probable
+-- Module       : Math.Probable.Random
 -- Copyright    : (c) 2014 Alp Mestanogullari
 -- License      : BSD3
 -- Maintainer   : alpmestan@gmail.com
@@ -111,7 +111,10 @@ module Math.Probable.Random
       listOf, vectorOf, vectorOfVariate
     ) where
 
+#if !MIN_VERSION_base(4, 8, 0)
 import Control.Applicative
+#endif
+
 import Control.Monad.Identity
 import Control.Monad.Primitive
 import Control.Monad.ST
