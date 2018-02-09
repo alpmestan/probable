@@ -30,7 +30,7 @@ import Control.Monad.Primitive
 import Math.Probable.Distribution.Finite
 import Math.Probable.Random
 
-import Statistics.Distribution (ContGen, DiscreteGen, genContVar, genDiscreteVar)
+import Statistics.Distribution (ContGen, DiscreteGen, genContVar, genDiscreteVar, fromSample)
 import Statistics.Distribution.Beta
 import Statistics.Distribution.CauchyLorentz
 import qualified Statistics.Distribution.ChiSquared as Chi
@@ -245,8 +245,8 @@ standard = continuous N.standard
 -- > , 1.7650436484843248 ]
 normalFromSample :: PrimMonad m
                  => Sample -- ^ sample
-                 -> RandT m Double
-normalFromSample = continuous . N.normalFromSample
+                 -> Maybe (RandT m Double)
+normalFromSample s = continuous <$> (fromSample s :: Maybe N.NormalDistribution)
 
 -- | Exponential distribution (from @Statistics.Distribution.Exponential@)
 -- 
@@ -269,8 +269,8 @@ exponential = continuous . E.exponential
 -- > , 0.8891555734786789 ]
 exponentialFromSample :: PrimMonad m
                       => Sample
-                      -> RandT m Double
-exponentialFromSample = continuous . E.exponentialFromSample
+                      -> Maybe (RandT m Double)
+exponentialFromSample s = continuous <$> (fromSample s :: Maybe E.ExponentialDistribution)
 
 
 

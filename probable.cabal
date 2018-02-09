@@ -80,8 +80,8 @@ library
                        Math.Probable.Distribution.Finite,
                        Math.Probable.Random
   other-modules:
-  build-depends:       base >=4.5 && <4.10,
-                       statistics >= 0.10,
+  build-depends:       base >=4.5 && <4.11,
+                       statistics >= 0.14,
                        vector >= 0.10,
                        mwc-random >= 0.10,
                        primitive,
